@@ -13,11 +13,12 @@ var rollbar = new Rollbar({
 });
 
 // record a generic message and send it to Rollbar
-rollbar.log("Hello world!");
+// rollbar.log("Hello world!");
 
 app.use(express.json())
 
 app.get('/', (req, res) => {
+    rollbar.info('A new player has visited the site')
     res.sendFile(path.join(__dirname, '/public/index.html'))
 })
 
@@ -45,6 +46,7 @@ app.get('/api/robots/five', (req, res) => {
 })
 
 app.post('/api/duel', (req, res) => {
+    rollbar.info('Total duels to-date')
     try {
         // getting the duos from the front end
         let {compDuo, playerDuo} = req.body
@@ -64,12 +66,15 @@ app.post('/api/duel', (req, res) => {
         // comparing the total health to determine a winner
         if (compHealthAfterAttack > playerHealthAfterAttack) {
             playerRecord.losses++
+            rollbar.info('Computer victory')
             res.status(200).send('You lost!')
         } else {
-            playerRecord.losses++
+            playerRecord.wins++
+            rollbar.info('Player victory')
             res.status(200).send('You won!')
         }
     } catch (error) {
+        rollbar.info(`Error occured while attempting to duel, ${error}`)
         console.log('ERROR DUELING', error)
         res.sendStatus(400)
     }
